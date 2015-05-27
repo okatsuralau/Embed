@@ -9,10 +9,9 @@ use Embed\Request;
 class Feed extends Source implements SourceInterface
 {
     protected $data;
-    protected $request;
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public static function check(Request $request)
     {
@@ -29,7 +28,7 @@ class Feed extends Source implements SourceInterface
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function __construct(Request $request)
     {
@@ -41,7 +40,7 @@ class Feed extends Source implements SourceInterface
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function isValid()
     {
@@ -49,23 +48,23 @@ class Feed extends Source implements SourceInterface
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function getSourceUrl()
     {
-        return $this->request->getUrl();
+        return $this->request->url->getUrl();
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function getProviderUrl()
     {
-        return !empty($this->data['url']) ? $this->data['url'] : ($this->request->getScheme().'://'.$this->request->getHost());
+        return !empty($this->data['url']) ? $this->data['url'] : ($this->request->url->getScheme().'://'.$this->request->url->getHost());
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function getItems()
     {
@@ -169,7 +168,7 @@ class Feed extends Source implements SourceInterface
     /**
      * Search entries from Atom xml
      *
-     * @param \SimpleXMLElement $xml
+     * @param \SimpleXMLElement $entries
      *
      * @return array
      */

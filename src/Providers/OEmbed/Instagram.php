@@ -1,10 +1,12 @@
 <?php
 namespace Embed\Providers\OEmbed;
 
-class Instagram extends \Embed\Providers\OEmbedImplementationAbstract
+use Embed\Url;
+
+class Instagram extends OEmbedImplementation
 {
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public static function getEndPoint()
     {
@@ -12,10 +14,22 @@ class Instagram extends \Embed\Providers\OEmbedImplementationAbstract
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public static function getPatterns()
     {
         return array('http://instagram.com/p/*');
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public static function getParams(Url $url)
+    {
+        $url = clone $url;
+
+        $url->setScheme('http');
+
+        return array('url' => $url->getUrl());
     }
 }

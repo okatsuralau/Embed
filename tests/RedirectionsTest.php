@@ -1,6 +1,4 @@
 <?php
-include_once dirname(__DIR__).'/src/autoloader.php';
-
 class RedirectionsTest extends PHPUnit_Framework_TestCase
 {
     public function testGoogleTranslate()
@@ -13,7 +11,7 @@ class RedirectionsTest extends PHPUnit_Framework_TestCase
     public function testRdio()
     {
         $info1 = Embed\Embed::create('http://rd.io/x/Q1IjXC8s');
-        $info2 = Embed\Embed::create('https://www.rdio.com/artist/Soundgarden/album/Superunknown/');
+        $info2 = Embed\Embed::create('https://www.rdio.com/artist/Soundgarden/album/Superunknown/?utm_campaign=share&utm_medium=Album&utm_source=13&utm_content=224371');
         $this->assertEquals($info1->url, $info2->url);
     }
 

@@ -119,14 +119,14 @@ class Url
      *
      * @param boolean $first_level True to return the first level domain (.com, .es, etc)
      *
-     * @return string The domain or null
+     * @return string
      */
     public function getDomain($first_level = false)
     {
         $host = $this->getHost();
 
-        if (!$host) {
-            return;
+        if (empty($host)) {
+            return '';
         }
 
         $host = array_reverse(explode('.', $host));
@@ -145,6 +145,33 @@ class Url
 
                 return ($host[1] === 'co' || $host[1] === 'com') ? $host[2] : $host[1];
         }
+    }
+
+    /**
+     * Edit a specific directory in the path of the url
+     *
+     * @param int|null $key   The position of the subdirectory (0 based index). Null to append
+     * @param string   $value The new value
+     */
+    public function setDirectory($key, $value)
+    {
+        if (($key === null) || $key > count($this->info['path'])) {
+            if (isset($this->info['file'])) {
+                $this->info['path'][] = $this->info['file'];
+            }
+
+            $this->info['file'] = $value;
+
+            return;
+        }
+
+        if ($key === count($this->info['path'])) {
+            $this->info['file'] = $value;
+
+            return;
+        }
+
+        $this->info['path'][$key] = $value;
     }
 
     /**
@@ -223,8 +250,8 @@ class Url
     /**
      * Set a new GET parameter or modify an existing one
      *
-     * @param string $name  The parameter name or an array of parameters
-     * @param string $value The parameter value
+     * @param string|array $name  The parameter name or an array of parameters
+     * @param string       $value The parameter value
      */
     public function setParameter($name, $value = null)
     {

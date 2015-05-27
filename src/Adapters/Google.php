@@ -6,38 +6,38 @@ namespace Embed\Adapters;
 
 use Embed\Url;
 use Embed\Request;
-use Embed\Viewers;
+use Embed\Utils;
 
 class Google extends Webpage implements AdapterInterface
 {
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public static function check(Request $request)
     {
         return $request->match(array(
             'https://maps.google.*',
-            'https://www.google.com/maps*',
+            'https://www.google.*/maps*',
         ));
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function getCode()
     {
-        $url = new Url($this->request->getUrl());
+        $url = new Url($this->request->url->getUrl());
 
         $url->setParameter('output', 'embed');
         $url->setParameter('s', '');
 
-        return Viewers::iframe($url->getUrl());
+        return Utils::iframe($url->getUrl());
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
-    public function getImages()
+    public function getImagesUrls()
     {
         return array();
     }

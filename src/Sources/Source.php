@@ -1,13 +1,18 @@
 <?php
-/**
- * Base Source extended by all sources
- *
- * Provide default functionalities
- */
 namespace Embed\Sources;
 
+/**
+ * Base Source extended by all sources
+ * Provide default functionalities
+ *
+ * @property null|string $providerUrl
+ * @property string      $sourceUrl
+ * @property array       $items
+ */
 abstract class Source
 {
+    public $request;
+
     /**
      * Magic method to execute methods on get paramaters
      * For example, $source->sourceUrl executes $source->getSourceUrl()

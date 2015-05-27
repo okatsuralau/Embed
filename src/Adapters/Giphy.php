@@ -4,13 +4,13 @@
  */
 namespace Embed\Adapters;
 
-use Embed\Viewers;
+use Embed\Utils;
 use Embed\Request;
 
 class Giphy extends Webpage implements AdapterInterface
 {
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public static function check(Request $request)
     {
@@ -20,12 +20,14 @@ class Giphy extends Webpage implements AdapterInterface
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function getCode()
     {
-        if (($id = $this->request->getDirectory(1))) {
-            return Viewers::iframe('//giphy.com/embed/'.$id, $this->width.'px', $this->height.'px');
+        if (($url = $this->providers['twittercards']->bag->get('player'))) {
+            $url = str_replace('/twitter/iframe', '?html5=true', $url);
+
+            return Utils::iframe($url, $this->width.'px', $this->height.'px');
         }
     }
 }

@@ -5,42 +5,46 @@
 namespace Embed\Adapters;
 
 use Embed\Request;
-use Embed\Providers\Provider;
+use Embed\Bag;
+use Embed\Utils;
 
 class Soundcloud extends Webpage implements AdapterInterface
 {
     public $api;
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public static function check(Request $request)
     {
         return $request->match(array(
             'https?://soundcloud.com/*',
+            'https?://m.soundcloud.com/*',
         ));
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
-    protected function initProviders(Request $request)
+    public function run()
     {
-        parent::initProviders($request);
+        parent::run();
 
-        $this->api = new Provider();
+        $this->api = new Bag();
 
-        $api = $request->createSubRequest('http://api.soundcloud.com/resolve.json');
-        $api->setParameter('client_id', isset($this->options['soundcloudClientId']) ? $this->options['soundcloudClientId'] : 'YOUR_CLIENT_ID');
-        $api->setParameter('url', $request->getUrl());
+        if (isset($this->config['soundcloudKey'])) {
+            $api = $this->request->createRequest('http://api.soundcloud.com/resolve.json');
+            $api->startingUrl->setParameter('client_id', $this->config['soundcloudKey']);
+            $api->startingUrl->setParameter('url', $this->request->url->getUrl());
 
-        if ($json = $api->getJsonContent()) {
-            $this->api->set($json);
+            if ($json = $api->getJsonContent()) {
+                $this->api->set($json);
+            }
         }
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function getTitle()
     {
@@ -48,7 +52,7 @@ class Soundcloud extends Webpage implements AdapterInterface
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function getDescription()
     {
@@ -56,7 +60,15 @@ class Soundcloud extends Webpage implements AdapterInterface
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
+     */
+    public function getType()
+    {
+        return $this->code ? 'rich' : 'link';
+    }
+
+    /**
+     * {@inheritdoc}
      */
     public function getUrl()
     {
@@ -64,21 +76,24 @@ class Soundcloud extends Webpage implements AdapterInterface
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
-    public function getImages()
+    public function getImagesUrls()
     {
-        $images = parent::getImages();
+        $images = parent::getImagesUrls();
 
         if (!$this->api->get('artwork_url') && ($img = $this->api->get('user', 'avatar_url'))) {
-            array_unshift($images, str_replace('-large.jpg', '-t500x500.jpg', $img));
+            Utils::unshiftValue($images, array(
+                'value' => str_replace('-large.jpg', '-t500x500.jpg', $img),
+                'providers' => array('api'),
+            ));
         }
 
-        return array_unique($images);
+        return $images;
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function getAuthorName()
     {
@@ -86,7 +101,7 @@ class Soundcloud extends Webpage implements AdapterInterface
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function getAuthorUrl()
     {

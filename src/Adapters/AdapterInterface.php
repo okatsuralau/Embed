@@ -5,8 +5,9 @@
 namespace Embed\Adapters;
 
 use Embed\Request;
+use Embed\DataInterface;
 
-interface AdapterInterface
+interface AdapterInterface extends DataInterface
 {
     /**
      * Checks whether the request is valid to this Adapter
@@ -21,70 +22,18 @@ interface AdapterInterface
      * Constructor.
      *
      * @param Request    $request
-     * @param null|array $options
+     * @param null|array $config
      */
-    public function __construct(Request $request, array $options = null);
+    public function __construct(Request $request, array $config = null);
 
     /**
-     * Gets the title
-     *
-     * @return string|null
+     * Run the provider
      */
-    public function getTitle();
-
-    /**
-     * Gets the description
-     *
-     * @return string|null
-     */
-    public function getDescription();
-
-    /**
-     * Gets the type of the url
-     * The types are the same than the oEmbed types:
-     * video, photo, link, rich
-     *
-     * @return string|null
-     */
-    public function getType();
-
-    /**
-     * Gets the source url (feed, api, etc)
-     *
-     * @return string|null
-     */
-    public function getSource();
-
-    /**
-     * Gets the embed code
-     *
-     * @return string|null
-     */
-    public function getCode();
-
-    /**
-     * Gets the canonical url
-     *
-     * @return string|null
-     */
-    public function getUrl();
-
-    /**
-     * Gets the author name
-     *
-     * @return string|null
-     */
-    public function getAuthorName();
-
-    /**
-     * Gets the author url
-     *
-     * @return string|null
-     */
-    public function getAuthorUrl();
+    public function run();
 
     /**
      * Gets all icon provider urls found
+     * It returns also the width, height and mime-type
      *
      * @return array
      */
@@ -92,7 +41,7 @@ interface AdapterInterface
 
     /**
      * Gets the best icon provider
-     * if $options['getBiggerIcon'] is true, returns the bigger image found
+     * if $config['getBiggerIcon'] is true, returns the bigger image found
      * else, returns the first found
      *
      * @return string|null
@@ -100,21 +49,8 @@ interface AdapterInterface
     public function getProviderIcon();
 
     /**
-     * Gets the provider name
-     *
-     * @return string|null
-     */
-    public function getProviderName();
-
-    /**
-     * Gets the provider url (usually the home url of the link)
-     *
-     * @return string|null
-     */
-    public function getProviderUrl();
-
-    /**
      * Gets all images found in the webpage
+     * It returns also the width, height and mime-type
      *
      * @return array
      */
@@ -122,7 +58,7 @@ interface AdapterInterface
 
     /**
      * Gets the best image
-     * if $options['getBiggerImage'] is true, returns the biggest image
+     * if $config['getBiggerImage'] is true, returns the biggest image
      *
      * @return string|null
      */
@@ -141,20 +77,6 @@ interface AdapterInterface
      * @return integer|null
      */
     public function getImageHeight();
-
-    /**
-     * Gets the width of the embedded widget
-     *
-     * @return integer|null
-     */
-    public function getWidth();
-
-    /**
-     * Gets the height of the embedded widget
-     *
-     * @return integer|null
-     */
-    public function getHeight();
 
     /**
      * Gets the aspect ratio of the embedded widget

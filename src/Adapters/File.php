@@ -5,14 +5,14 @@
 namespace Embed\Adapters;
 
 use Embed\Request;
-use Embed\Viewers;
-use Embed\Providers\OEmbed;
-use Embed\Providers\OEmbedImplementations;
+use Embed\Utils;
+use Embed\Providers;
 
 class File extends Adapter implements AdapterInterface
 {
     private static $contentTypes = array(
         'video/ogg' => array('video', 'videoHtml'),
+        'application/ogg' => array('video', 'videoHtml'),
         'video/ogv' => array('video', 'videoHtml'),
         'video/webm' => array('video', 'videoHtml'),
         'video/mp4' => array('video', 'videoHtml'),
@@ -36,7 +36,7 @@ class File extends Adapter implements AdapterInterface
     );
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public static function check(Request $request)
     {
@@ -44,19 +44,15 @@ class File extends Adapter implements AdapterInterface
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
-    protected function initProviders(Request $request)
+    public function run()
     {
-        $this->request = $request;
-
-        if (($oEmbed = OEmbedImplementations::create($request))) {
-            $this->providers['OEmbed'] = $oEmbed;
-        }
+        $this->addProvider('oembed', new Providers\OEmbed());
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function getType()
     {
@@ -64,42 +60,36 @@ class File extends Adapter implements AdapterInterface
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function getCode()
     {
         switch (self::$contentTypes[$this->request->getMimeType()][1]) {
             case 'videoHtml':
-                return Viewers::videoHtml($this->getImage(), $this->getUrl(), $this->getWidth(), $this->getHeight());
+                return Utils::videoHtml($this->getImage(), $this->getUrl(), $this->getWidth(), $this->getHeight());
 
             case 'audioHtml':
-                return Viewers::audioHtml($this->getUrl());
+                return Utils::audioHtml($this->getUrl());
 
             case 'google':
-                return Viewers::google($this->getUrl());
+                return Utils::google($this->getUrl());
         }
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
-    public function getImages()
+    public function getImagesUrls()
     {
         if ($this->getType() === 'photo') {
-            return array($this->getUrl());
+            return array(
+                array(
+                    'value' => $this->getUrl(),
+                    'providers' => array('adapter'),
+                ),
+            );
         }
 
         return array();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function getProviderIcons()
-    {
-        return array(
-            $this->request->getAbsolute('/favicon.ico'),
-            $this->request->getAbsolute('/favicon.png'),
-        );
     }
 }

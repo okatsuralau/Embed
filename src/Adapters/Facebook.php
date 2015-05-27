@@ -4,9 +4,10 @@
  */
 namespace Embed\Adapters;
 
-use Embed\Providers\Provider;
+use Embed\Bag;
 use Embed\Request;
 use Embed\Url;
+use Embed\Utils;
 
 class Facebook extends Webpage implements AdapterInterface
 {
@@ -15,7 +16,7 @@ class Facebook extends Webpage implements AdapterInterface
     private $isPost = false;
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public static function check(Request $request)
     {
@@ -27,14 +28,12 @@ class Facebook extends Webpage implements AdapterInterface
     /**
      * Returns the id found in an facebook url
      *
-     * @param string $url
+     * @param Url $url
      *
-     * @return null|string
+     * @return string
      */
-    private function getId($url)
+    private function getId(Url $url)
     {
-        $url = new Url($url);
-
         if ($url->hasParameter('story_fbid')) {
             $this->isPost = true;
 
@@ -73,18 +72,18 @@ class Facebook extends Webpage implements AdapterInterface
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
-    protected function initProviders(Request $request)
+    public function run()
     {
-        parent::initProviders($request);
+        //parent::run();
 
-        $this->api = new Provider();
+        $this->api = new Bag();
 
-        if (($id = $this->getId($request->getStartingUrl()))) {
-            if ($this->options['facebookAccessToken']) {
-                $api = $request->createSubRequest('https://graph.facebook.com/'.$id);
-                $api->setParameter('access_token', $this->options['facebookAccessToken']);
+        if (($id = $this->getId($this->request->startingUrl))) {
+            if ($this->config['facebookKey']) {
+                $api = $this->request->createRequest('https://graph.facebook.com/'.$id);
+                $api->startingUrl->setParameter('access_token', $this->config['facebookKey']);
 
                 if ($json = $api->getJsonContent()) {
                     $this->api->set($json);
@@ -96,7 +95,7 @@ class Facebook extends Webpage implements AdapterInterface
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function getTitle()
     {
@@ -104,7 +103,7 @@ class Facebook extends Webpage implements AdapterInterface
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function getDescription()
     {
@@ -112,19 +111,19 @@ class Facebook extends Webpage implements AdapterInterface
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function getUrl()
     {
         if ($this->isPost) {
-            return $this->request->getStartingUrl();
+            return $this->request->startingUrl->getUrl();
         }
 
-        return $this->api->get('url') ?: $this->request->getStartingUrl();
+        return $this->api->get('url') ?: $this->request->startingUrl->getUrl();
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function getCode()
     {
@@ -145,7 +144,7 @@ EOT;
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function getProviderName()
     {
@@ -153,7 +152,7 @@ EOT;
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function getAuthorName()
     {
@@ -161,34 +160,36 @@ EOT;
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function getSource()
     {
         $id = $this->api->get('id');
 
-        if ($id) {
+        if (!empty($id)) {
             return 'https://www.facebook.com/feeds/page.php?id='.$id.'&format=rss20';
         }
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
-    public function getImages()
+    public function getImagesUrls()
     {
-        $images = parent::getImages();
+        $images = parent::getImagesUrls();
 
-        $cover = $this->api->get('cover');
-
-        if ($cover && !empty($cover['source'])) {
-            array_unshift($images, $cover['source']);
+        if (($cover = $this->api->get('cover')) && !empty($cover['source'])) {
+            Utils::unshiftValue($images, array(
+                'value' => $cover['source'],
+                'providers' => array('api'),
+            ));
         }
 
-        $id = $this->api->get('id');
-
-        if ($id) {
-            array_unshift($images, 'https://graph.facebook.com/'.$id.'/picture');
+        if (($id = $this->api->get('id'))) {
+            Utils::unshiftValue($images, array(
+                'value' => 'https://graph.facebook.com/'.$id.'/picture',
+                'providers' => array('api'),
+            ));
         }
 
         return $images;

@@ -1,46 +1,42 @@
 <?php
-/**
- * Class to execute request and return the content
- */
 namespace Embed;
 
-use Embed\Url;
-
+/**
+ * Class to execute request and return the content
+ *
+ * @property Url $url
+ * @property RequestResolvers\RequestResolverInterface $resolver
+ */
 class Request
 {
     public $startingUrl;
-    public $url;
-    public $resolver;
 
-    private $defaultResolverClass = 'Embed\\RequestResolvers\\Curl';
-    private $resolverClass;
+    private $resolverClass = 'Embed\\RequestResolvers\\Curl';
     private $resolverConfig;
 
     private $xmlContent;
     private $jsonContent;
     private $htmlContent;
 
-
     /**
      * Constructor. Sets the url
      *
-     * @param Url    $url The Url instance
-     * @param null|string $resolverClass The resolver classname
-     * @param null|array $resolverConfig The resolver configuration
+     * @param Url         $url            The Url instance
+     * @param null|string $resolverClass  The resolver classname
+     * @param null|array  $resolverConfig The resolver configuration
      */
     public function __construct(Url $url, $resolverClass = null, array $resolverConfig = null)
     {
-        if ($resolverClass) {
+        if ($resolverClass !== null) {
             $this->setResolverClass($resolverClass);
         }
 
-        if ($resolverConfig) {
+        if ($resolverConfig !== null) {
             $this->setResolverConfig($resolverConfig);
         }
 
-        $this->setUrl($url);
+        $this->startingUrl = $url;
     }
-
 
     /**
      * Magic method to retrieve the resolver an url in lazy mode
@@ -52,23 +48,25 @@ class Request
                 return $this->url = new Url($this->resolver->getUrl());
 
             case 'resolver':
-                $resolverClass = $this->resolverClass ?: $this->defaultResolverClass;
+                $this->resolver = new $this->resolverClass(UrlRedirect::resolve($this->startingUrl->getUrl()));
 
-                return $this->resolver = new $resolverClass(UrlRedirect::resolve($this->startingUrl->getUrl()), $this->resolverConfig);
+                if (is_array($this->resolverConfig)) {
+                    $this->resolver->setConfig($this->resolverConfig);
+                }
+
+                return $this->resolver;
         }
     }
-
 
     /**
      * Creates a new request with the same configuration than this
      *
-     * @param string  $url The url string
+     * @param string $url The url string
      */
-    public function createSubRequest($url)
+    public function createRequest($url)
     {
         return new Request(new Url($url), $this->resolverClass, $this->resolverConfig);
     }
-
 
     /**
      * Set the url resolver class used for http requests
@@ -95,32 +93,20 @@ class Request
      *
      * @param array $config
      */
-    public static function setResolverConfig(array $config)
+    public function setResolverConfig(array $config)
     {
-        $this->resolverConfig = $config;
+        $this->resolverConfig = array_replace($this->resolverConfig, $config);
     }
 
     /**
-     * Set a new url
-     *
-     * @param Url $url The Url instance
-     */
-    public function setUrl(Url $url)
-    {
-        $this->htmlContent = $this->jsonContent = $this->xmlContent = null;
-        $this->startingUrl = $url;
-
-        unset($this->url, $this->resolver);
-    }
-
-    /**
-     * Return the url
+     * Clear the cache of the response
      *
      * @return string The current url
      */
-    public function getUrl()
+    public function clearCache()
     {
-        return $this->resolver->getUrl();
+        $this->htmlContent = $this->jsonContent = $this->xmlContent = null;
+        unset($this->url, $this->resolver);
     }
 
     /**
@@ -143,16 +129,6 @@ class Request
     public function getRequestInfo()
     {
         return $this->resolver->getRequestInfo();
-    }
-
-    /**
-     * Return the starting url (before all possible redirects)
-     *
-     * @return string The starting url
-     */
-    public function getStartingUrl()
-    {
-        return $this->resolver->getStartingUrl();
     }
 
     /**
@@ -265,7 +241,7 @@ class Request
     }
 
     /**
-     * Check if the url is valid or not
+     * Check if the response is valid or not
      *
      * @return boolean True if it's valid, false if not
      */
