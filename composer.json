@@ -1,5 +1,5 @@
 {
-    "name": "embed/embed",
+    "name": "okatsuralau/embed",
     "type": "library",
     "description": "PHP library to retrieve page info using oembed, opengraph, etc",
     "keywords": ["oembed", "opengraph", "twitter cards", "embed", "embedly"],
@@ -16,6 +16,14 @@
     "support": {
         "email": "oom@oscarotero.com",
         "issues": "https://github.com/oscarotero/Embed/issues"
+    },
+    "version" : "1.9.0",
+    "minimum-stability" : "dev",
+    "extra" : {
+        "branch-alias" : {
+            "dev-master" : "dev-v1.x"
+        },
+        "installer-name" : "Embed"
     },
     "require": {
         "php": ">=5.3.0",
