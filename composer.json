@@ -19,7 +19,7 @@
     },
     "extra" : {
         "branch-alias" : {
-            "dev-master" : "v1.*"
+            "dev-master" : "master"
         },
         "installer-name" : "Embed"
     },
