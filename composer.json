@@ -17,8 +17,6 @@
         "email": "oom@oscarotero.com",
         "issues": "https://github.com/oscarotero/Embed/issues"
     },
-    "version" : "1.9.0",
-    "minimum-stability" : "dev",
     "extra" : {
         "branch-alias" : {
             "dev-master" : "v1.*"
