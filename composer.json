@@ -21,7 +21,7 @@
     "minimum-stability" : "dev",
     "extra" : {
         "branch-alias" : {
-            "dev-master" : "dev-v1.x"
+            "dev-master" : "1.*"
         },
         "installer-name" : "Embed"
     },
